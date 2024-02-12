@@ -111,7 +111,7 @@ jobs:
           docker cp "arm32v7_debian:./dark" "/tmp/releases"
 
           #meta
-          file /tmp/releases/*_arm_Linux && ls /tmp/releases/*_arm_Linux -lahr
+          file /tmp/releases/dark && ls /tmp/releases/dark -lahr
           #Delete Containers
           docker ps -a -q | xargs docker rm >/dev/null 2>&1
           #Del Docker Images
@@ -123,7 +123,7 @@ jobs:
         with:
           name: darkhttpd
           path: |
-            /tmp/release/*
+            /tmp/releases/*
             
       - name: Create Body for Release
         run: |

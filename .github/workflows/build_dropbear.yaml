@@ -83,42 +83,14 @@ jobs:
           echo "DROPBEAR_VERSION=$DROPBEAR_VERSION" >> $GITHUB_ENV
         continue-on-error: true
 
-      - name: Build dropbear for amd_x86_64 (Natively)
-        run: |
-          #Presets
-          set -x ; set +e
-          #--------------#
-          #Get Source
-          pushd "$(mktemp -d)" && git clone "https://github.com/mkj/dropbear" && cd "./dropbear"
-          #Configure Static
-          ./configure --enable-static --disable-harden
-          #Make a multicall-binary : https://github.com/mkj/dropbear/blob/master/MULTI.md
-          make PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp" MULTI=1 -j"$(($(nproc)+1))"
-          mv "./dropbearmulti" "/tmp/releases/dropbearmulti_amd_x86_64_Linux"
-          #Make Single Binaries : https://github.com/mkj/dropbear/blob/master/INSTALL.md
-          make clean ; make PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp" -j"$(($(nproc)+1))"
-          #Move to releases
-          mv "./dbclient" "/tmp/releases/dbclient_amd_x86_64_Linux"
-          mv "./dropbear" "/tmp/releases/dropbear_amd_x86_64_Linux"
-          mv "./dropbearkey" "/tmp/releases/dropbearkey_amd_x86_64_Linux"
-          mv "./dropbearconvert" "/tmp/releases/dropbearconvert_amd_x86_64_Linux"
-          mv "./scp" "/tmp/releases/dropbearscp_amd_x86_64_Linux"
-          #Doesn't really reduce much size
-          ##Make Only Server: https://github.com/mkj/dropbear/blob/master/SMALL.md
-          #make clean ; make PROGRAMS="dropbear" -j"$(($(nproc)+1))"
-          #meta
-          file /tmp/releases/*amd_x86_64 && ls /tmp/releases/*amd_x86_64 -lahr ; popd
-          #strip
-          strip /tmp/releases/*
-        continue-on-error: true
 
-      - name: Build dropbear for aarch64_arm64_arm64-v8 (Docker)
+      - name: Build dropbear for armv7 (Docker)
         run: |
           #Presets
           set -x ; set +e
           #--------------#
-          docker run --privileged --name "arm64v8_debian" \
-            "arm64v8/debian:latest" \
+          docker run --privileged --name "armv7_debian" \
+            "armv7/debian:latest" \
             bash -c '
               export DEBIAN_FRONTEND=noninteractive
               apt-get update -y ; apt-get dist-upgrade -y ; apt-get upgrade -y
@@ -126,7 +98,7 @@ jobs:
               apt install autoconf automake autopoint binutils bison build-essential ca-certificates coreutils curl dos2unix git gcc htop flex file jq moreutils nano pkg-config sudo util-linux wget -y
               apt install "*glibc*" "libssl*" lzip musl musl-dev musl-tools "openssl*" -y
               apt install asciidoctor libcapnp-dev libcap-ng-dev libcap-ng-utils libpython3-dev po4a zlib1g-dev -y
-              pushd "$(mktemp -d)" && curl -qfLJO "$(curl -qfsSL https://api.github.com/repos/upx/upx/releases/latest | jq -r ".assets[].browser_download_url" | grep -i "arm64_linux")"
+              pushd "$(mktemp -d)" && curl -qfLJO "$(curl -qfsSL https://api.github.com/repos/upx/upx/releases/latest | jq -r ".assets[].browser_download_url" | grep -i "arm_linux")"
               find . -type f -name "*tar*" -exec tar -xvf {} \;
               sudo find . -type f -name "upx" -exec mv {} "/usr/bin/upx" \;  
               sudo cp "/usr/bin/upx" "/usr/local/bin/upx"
@@ -134,23 +106,23 @@ jobs:
               git clone "https://github.com/mkj/dropbear" && cd "./dropbear"
               ./configure --enable-static --disable-harden
               make PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp" MULTI=1 -j"$(($(nproc)+1))"
-              strip "./dropbearmulti" ; mv "./dropbearmulti" "/dropbearmulti_aarch64_arm64_Linux"
+              strip "./dropbearmulti" ; mv "./dropbearmulti" "/dropbearmulti_arm_Linux"
               make clean ; make PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp" -j"$(($(nproc)+1))"
-              strip "./dbclient" ; mv "./dbclient" "/dbclient_aarch64_arm64_Linux"
-              strip "./dropbear" ; mv "./dropbear" "/dropbear_aarch64_arm64_Linux"
-              strip "./dropbearkey" ; mv "./dropbearkey" "/dropbearkey_aarch64_arm64_Linux"
-              strip "./dropbearconvert" ; mv "./dropbearconvert" "/dropbearconvert_aarch64_arm64_Linux"
-              strip "./scp" ; mv "./scp" "/dropbearscp_aarch64_arm64_Linux"
+              strip "./dbclient" ; mv "./dbclient" "/dbclient_arm_Linux"
+              strip "./dropbear" ; mv "./dropbear" "/dropbear_arm_Linux"
+              strip "./dropbearkey" ; mv "./dropbearkey" "/dropbearkey_arm_Linux"
+              strip "./dropbearconvert" ; mv "./dropbearconvert" "/dropbearconvert_arm_Linux"
+              strip "./scp" ; mv "./scp" "/dropbearscp_arm_Linux"
             '
           #Copy 
-          docker cp "arm64v8_debian:./dropbearmulti_aarch64_arm64_Linux" "/tmp/releases"
-          docker cp "arm64v8_debian:./dbclient_aarch64_arm64_Linux" "/tmp/releases"
-          docker cp "arm64v8_debian:./dropbear_aarch64_arm64_Linux" "/tmp/releases"
-          docker cp "arm64v8_debian:./dropbearkey_aarch64_arm64_Linux" "/tmp/releases"
-          docker cp "arm64v8_debian:./dropbearconvert_aarch64_arm64_Linux" "/tmp/releases"
-          docker cp "arm64v8_debian:./dropbearscp_aarch64_arm64_Linux" "/tmp/releases"
+          docker cp "armv7_debian:./dropbearmulti_arm_Linux" "/tmp/releases"
+          docker cp "armv7_debian:./dbclient_arm_Linux" "/tmp/releases"
+          docker cp "armv7_debian:./dropbear_arm_Linux" "/tmp/releases"
+          docker cp "armv7_debian:./dropbearkey_arm_Linux" "/tmp/releases"
+          docker cp "armv7_debian:./dropbearconvert_arm_Linux" "/tmp/releases"
+          docker cp "armv7_debian:./dropbearscp_arm_Linux" "/tmp/releases"
           #meta
-          file /tmp/releases/*_aarch64_arm64_Linux && ls /tmp/releases/*_aarch64_arm64_Linux -lahr
+          file /tmp/releases/*_arm_Linux && ls /tmp/releases/*_arm_Linux -lahr
           #Delete Containers
           docker ps -a -q | xargs docker rm >/dev/null 2>&1
           #Del Docker Images

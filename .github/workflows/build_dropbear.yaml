@@ -103,24 +103,13 @@ jobs:
               sudo find . -type f -name "upx" -exec mv {} "/usr/bin/upx" \;  
               sudo cp "/usr/bin/upx" "/usr/local/bin/upx"
               sudo chmod +xwr "/usr/bin/upx" "/usr/local/bin/upx" ; upx -h ; popd
-              git clone "https://github.com/mkj/dropbear" && cd "./dropbear"
-              ./configure --enable-static --disable-harden
-              make PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp" MULTI=1 -j"$(($(nproc)+1))"
-              strip "./dropbearmulti" ; mv "./dropbearmulti" "/dropbearmulti_arm_Linux"
-              make clean ; make PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp" -j"$(($(nproc)+1))"
-              strip "./dbclient" ; mv "./dbclient" "/dbclient_arm_Linux"
-              strip "./dropbear" ; mv "./dropbear" "/dropbear_arm_Linux"
-              strip "./dropbearkey" ; mv "./dropbearkey" "/dropbearkey_arm_Linux"
-              strip "./dropbearconvert" ; mv "./dropbearconvert" "/dropbearconvert_arm_Linux"
-              strip "./scp" ; mv "./scp" "/dropbearscp_arm_Linux"
+              git clone "https://github.com/emikulic/darkhttpd" && cd "./darkhttpd"
+              make
+              strip "./darkhttpd" ; mv "./darkhttpd" "/darkhttpd"
             '
           #Copy 
-          docker cp "armv7_debian:./dropbearmulti_arm_Linux" "/tmp/releases"
-          docker cp "armv7_debian:./dbclient_arm_Linux" "/tmp/releases"
-          docker cp "armv7_debian:./dropbear_arm_Linux" "/tmp/releases"
-          docker cp "armv7_debian:./dropbearkey_arm_Linux" "/tmp/releases"
-          docker cp "armv7_debian:./dropbearconvert_arm_Linux" "/tmp/releases"
-          docker cp "armv7_debian:./dropbearscp_arm_Linux" "/tmp/releases"
+          docker cp "arm32v7_debian:./darkhttpd" "/tmp/releases"
+
           #meta
           file /tmp/releases/*_arm_Linux && ls /tmp/releases/*_arm_Linux -lahr
           #Delete Containers
@@ -129,6 +118,13 @@ jobs:
           docker images -q | xargs docker rmi -f >/dev/null 2>&1
         continue-on-error: true
 
+      - name: Upload files to Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: darkhttpd
+          path: |
+            /tmp/release/*
+            
       - name: Create Body for Release
         run: |
           set +e

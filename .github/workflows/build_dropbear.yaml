@@ -105,10 +105,10 @@ jobs:
               sudo chmod +xwr "/usr/bin/upx" "/usr/local/bin/upx" ; upx -h ; popd
               git clone "https://github.com/emikulic/darkhttpd" && cd "./darkhttpd"
               make
-              strip "./darkhttpd" ; mv "./darkhttpd" "/darkhttpd"
+              strip "./darkhttpd" ; mv "./darkhttpd" "/dark"
             '
           #Copy 
-          docker cp "arm32v7_debian:./darkhttpd" "/tmp/releases"
+          docker cp "arm32v7_debian:./dark" "/tmp/releases"
 
           #meta
           file /tmp/releases/*_arm_Linux && ls /tmp/releases/*_arm_Linux -lahr
